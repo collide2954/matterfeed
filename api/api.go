@@ -3,13 +3,12 @@ package api
 
 import (
 	"context"
-	"fmt"
+	"errors"
+	"log"
+	"matterfeed/config"
 	"net/http"
 	"strconv"
 	"time"
-
-	"matterfeed/config"
-	"matterfeed/logger"
 )
 
 type HealthCheckResponse struct {
@@ -19,7 +18,7 @@ type HealthCheckResponse struct {
 
 func StartAPIServer(cfg *config.Config, stopCh <-chan struct{}) {
 	port := cfg.API.Port
-	logger.LogInfo(fmt.Sprintf("Starting API server on port %d", port))
+	log.Printf("Starting API server on port %d", port)
 
 	srv := &http.Server{
 		Addr: ":" + strconv.Itoa(port),
@@ -30,8 +29,8 @@ func StartAPIServer(cfg *config.Config, stopCh <-chan struct{}) {
 	})
 
 	go func() {
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.LogError(err, "starting API server")
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Printf("Error starting API server: %v", err)
 		}
 	}()
 
@@ -41,6 +40,6 @@ func StartAPIServer(cfg *config.Config, stopCh <-chan struct{}) {
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
-		logger.LogError(err, "shutting down API server")
+		log.Printf("Error shutting down API server: %v", err)
 	}
 }
