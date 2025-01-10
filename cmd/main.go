@@ -72,7 +72,7 @@ func main() {
 			log.Println(message)
 			sendMessageErr := messenger.SendMessage(cfg.Mattermost.SecretURL, message)
 			if sendMessageErr != nil {
-				return fmt.Errorf("error sending message: %v", sendMessageErr)
+				return fmt.Errorf("error sending message: %w", sendMessageErr)
 			}
 			return nil
 		})
