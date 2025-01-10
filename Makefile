@@ -6,7 +6,7 @@ BINARY_PATH := ./bin/matterfeed
 .PHONY: setup tidy lint test build run clean vuln help
 
 HOMEBREW = https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
-PACKAGES = go gopls golangci-lint govulncheck
+PACKAGES = go gopls golangci-lint govulncheck pre-commit
 
 # setup the dependencies
 brew:
