@@ -1,5 +1,5 @@
-// cmd/db.go
-package main
+// data/data.go
+package data
 
 import (
 	"database/sql"

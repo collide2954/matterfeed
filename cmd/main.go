@@ -14,6 +14,7 @@ import (
 
 	"matterfeed/api"
 	"matterfeed/config"
+	"matterfeed/data"
 	"matterfeed/feed"
 	"matterfeed/messenger"
 )
@@ -30,7 +31,7 @@ func main() {
 		log.Fatalf("Error getting config file: %v", getConfigErr)
 	}
 
-	db, initDBErr := InitDBWithRetry()
+	db, initDBErr := data.InitDBWithRetry()
 	if initDBErr != nil {
 		log.Printf("Error initializing database: %v", initDBErr)
 		os.Exit(1)
