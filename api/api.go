@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+const ReadHeaderTimeout = 5 * time.Second
+
 type HealthCheckResponse struct {
 	Status string `json:"status"`
 	Port   int    `json:"port"`
@@ -21,10 +23,11 @@ func StartAPIServer(cfg *config.Config, stopCh <-chan struct{}) {
 	log.Printf("Starting API server on port %d", port)
 
 	srv := &http.Server{
-		Addr: ":" + strconv.Itoa(port),
+		Addr:              ":" + strconv.Itoa(port),
+		ReadHeaderTimeout: ReadHeaderTimeout,
 	}
 
-	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
@@ -36,7 +39,7 @@ func StartAPIServer(cfg *config.Config, stopCh <-chan struct{}) {
 
 	<-stopCh
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), ReadHeaderTimeout)
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
