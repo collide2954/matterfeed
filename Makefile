@@ -1,0 +1,64 @@
+.DEFAULT_GOAL := build
+
+BUILD_PATH := ./cmd/*
+BINARY_PATH := ./bin/matterfeed
+
+.PHONY: setup tidy lint test build run clean vuln help
+
+HOMEBREW = https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
+PACKAGES = go gopls golangci-lint govulncheck
+
+# setup the dependencies
+brew:
+	@echo "Setting up development environment..."
+	@which brew >/dev/null || /bin/bash -c "$(curl -fsSL $(HOMEBREW))"
+	@brew update
+	@for pkg in $(PACKAGES); do \
+		if ! brew list | grep -q $$pkg; then \
+			echo "Installing $$pkg"; \
+			brew install $$pkg --force; \
+		else \
+			echo "$$pkg is already installed."; \
+		fi; \
+	done
+	@echo "Setup complete!"
+
+# tidy for managing dependencies
+tidy:
+	go mod tidy
+
+# golangci-lint for comprehensive linting, with automatic fixes where applicable
+lint: tidy
+	golangci-lint run --fix
+
+# run tests
+test: lint
+	go test ./...
+
+# build the project and place the binary in the bin directory
+build: test
+	go build -o $(BINARY_PATH) $(BUILD_PATH)
+
+# run the binary
+run: build
+	$(BINARY_PATH)
+
+# remove the binary
+clean:
+	rm -f $(BINARY_PATH)
+
+# check for vulnerabilities
+vuln:
+	@echo "Running govulncheck..."
+	govulncheck ./...
+
+# help with the commands
+help:
+	@echo "Makefile commands:"
+	@echo "  make brew     - Ensure the software dependencies for development"
+	@echo "  make build     - Build the binary"
+	@echo "  make run       - Run the application"
+	@echo "  make clean     - Remove the binary"
+	@echo "  make lint      - Run linters with --fix flag for automatic fixes"
+	@echo "  make test      - Run tests"
+	@echo "  make vuln      - Check for vulnerabilities in dependencies"
