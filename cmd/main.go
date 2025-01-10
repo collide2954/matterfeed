@@ -19,22 +19,17 @@ import (
 	"matterfeed/messenger"
 )
 
-var (
-	ConfigFile = flag.String("config", "", "Valid TOML configuration file")
-)
-
 func main() {
 	flag.Parse()
-
-	configFile, getConfigErr := config.File(*ConfigFile)
-	if getConfigErr != nil {
-		log.Fatalf("Error getting config file: %v", getConfigErr)
+	configPath := flag.String("config", "", "Path to the TOML configuration file")
+	cfg, loadConfigErr := config.LoadConfig(*configPath)
+	if loadConfigErr != nil {
+		log.Fatalf("Error loading config: %v", loadConfigErr)
 	}
 
 	db, initDBErr := data.InitDBWithRetry()
 	if initDBErr != nil {
-		log.Printf("Error initializing database: %v", initDBErr)
-		os.Exit(1)
+		log.Fatalf("Error initializing database: %v", initDBErr)
 	}
 
 	defer func(db *sql.DB) {
@@ -54,12 +49,6 @@ func main() {
 
 	var wg sync.WaitGroup
 
-	cfg, loadConfigErr := config.LoadConfig(configFile)
-	if loadConfigErr != nil {
-		log.Printf("Error reading config from file %s: %v", configFile, loadConfigErr)
-		os.Exit(1)
-	}
-
 	feedHandler := feed.NewFeedHandler(feed.Config{
 		URLs:        cfg.Feeds.URLs,
 		RescanDelay: cfg.Feeds.RescanDelay,
@@ -78,7 +67,6 @@ func main() {
 			return nil
 		})
 	}()
-
 	wg.Add(1)
 	go func() {
 		defer wg.Done()

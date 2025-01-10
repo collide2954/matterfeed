@@ -37,7 +37,25 @@ type APIConfig struct {
 	Port int `toml:"port"`
 }
 
-func LoadConfig(filename string) (*Config, error) {
+func LoadConfig(configFlag string) (*Config, error) {
+	var filename string
+	if configFlag != "" {
+		filename = configFlag
+	} else {
+		configFiles, err := FindValidConfigFiles()
+		if err != nil {
+			return nil, err
+		}
+		switch len(configFiles) {
+		case 0:
+			return nil, errors.New("no valid config files found")
+		case 1:
+			filename = configFiles[0]
+		default:
+			return nil, fmt.Errorf("multiple valid config files found: %v", configFiles)
+		}
+	}
+
 	data, readErr := os.ReadFile(filename)
 	if readErr != nil {
 		return nil, readErr
@@ -92,24 +110,4 @@ func isValidConfigFile(filename string) bool {
 	}
 
 	return false
-}
-
-func File(configFlag string) (string, error) {
-	if configFlag != "" {
-		return configFlag, nil
-	}
-
-	configFiles, err := FindValidConfigFiles()
-	if err != nil {
-		return "", err
-	}
-
-	switch len(configFiles) {
-	case 0:
-		return "", errors.New("no valid config files found")
-	case 1:
-		return configFiles[0], nil
-	default:
-		return "", fmt.Errorf("multiple valid config files found: %v", configFiles)
-	}
 }
