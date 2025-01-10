@@ -38,11 +38,11 @@ func (fh *Handler) CheckFeeds(ctx context.Context, onNewArticle func(title, link
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			log.Printf("INFO: Starting feed scan")
+			log.Printf("starting feed scan")
 			for _, feedURL := range fh.config.URLs {
 				feed, fetchErr := rss.Fetch(feedURL)
 				if fetchErr != nil {
-					log.Printf("ERROR: Failed fetching feed: %v", fetchErr)
+					log.Printf("failed fetching feed: %v", fetchErr)
 					continue
 				}
 
@@ -50,7 +50,7 @@ func (fh *Handler) CheckFeeds(ctx context.Context, onNewArticle func(title, link
 					var seen bool
 					queryErr := fh.db.QueryRow("SELECT EXISTS(SELECT 1 FROM seen_articles WHERE id = ?)", item.ID).Scan(&seen)
 					if queryErr != nil {
-						log.Printf("ERROR: Failed querying seen articles: %v", queryErr)
+						log.Printf("failed querying seen articles: %v", queryErr)
 						continue
 					}
 
@@ -64,7 +64,7 @@ func (fh *Handler) CheckFeeds(ctx context.Context, onNewArticle func(title, link
 							"INSERT INTO seen_articles (id, title, link, date) VALUES (?, ?, ?, ?)",
 							item.ID, item.Title, item.Link, item.Date)
 						if insertErr != nil {
-							log.Printf("ERROR: Failed inserting seen article: %v", insertErr)
+							log.Printf("failed inserting seen article: %v", insertErr)
 							continue
 						}
 					}
