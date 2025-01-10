@@ -82,8 +82,6 @@ func isValidConfigFile(filename string) bool {
 	defer func(file *os.File) {
 		if closeErr := file.Close(); closeErr != nil {
 			log.Printf("Error closing file %s: %v", filename, closeErr)
-
-			log.Printf("Error closing file %s: %v", filename, err)
 		}
 	}(file)
 
