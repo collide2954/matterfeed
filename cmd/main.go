@@ -14,7 +14,6 @@ import (
 	"matterfeed/api"
 	"matterfeed/config"
 	"matterfeed/feed"
-	"matterfeed/logger"
 	"matterfeed/messenger"
 )
 
@@ -36,7 +35,7 @@ func main() {
 
 	db, initDBErr := InitDBWithRetry()
 	if initDBErr != nil {
-		logger.LogAndReturnError(initDBErr, "initializing database")
+		log.Printf("Error initializing database: %v", initDBErr)
 		os.Exit(1)
 	}
 	defer db.Close()
@@ -53,11 +52,9 @@ func main() {
 
 	cfg, loadConfigErr := config.LoadConfig(configFile)
 	if loadConfigErr != nil {
-		logger.LogAndReturnError(loadConfigErr, fmt.Sprintf("reading config from file: %s", configFile))
+		log.Printf("Error reading config from file %s: %v", configFile, loadConfigErr)
 		os.Exit(1)
 	}
-
-	logger.InitLogger(cfg.Logging.OutputToTerminal)
 
 	feedHandler := feed.NewFeedHandler(feed.FeedConfig{
 		URLs:        cfg.Feeds.URLs,
@@ -69,10 +66,10 @@ func main() {
 		defer wg.Done()
 		feedHandler.CheckFeeds(ctx, func(title, link string) error {
 			message := fmt.Sprintf("New article: %s - %s", title, link)
-			logger.LogInfo(message)
+			log.Println(message)
 			sendMessageErr := messenger.SendMessage(cfg.Mattermost.SecretURL, message)
 			if sendMessageErr != nil {
-				return logger.LogAndReturnError(sendMessageErr, "sending message")
+				return fmt.Errorf("Error sending message: %v", sendMessageErr)
 			}
 			return nil
 		})
@@ -86,7 +83,7 @@ func main() {
 
 	go func() {
 		<-signalChan
-		fmt.Println("Received shutdown signal")
+		log.Println("Received shutdown signal")
 		close(stopCh)
 		cancel()
 	}()
@@ -97,5 +94,5 @@ func main() {
 	}()
 
 	<-doneCh
-	fmt.Println("All goroutines finished, shutting down.")
+	log.Println("All goroutines finished, shutting down.")
 }
