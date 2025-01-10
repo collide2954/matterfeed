@@ -26,7 +26,7 @@ var (
 func main() {
 	flag.Parse()
 
-	configFile, getConfigErr := config.GetSingleConfigFile(*ConfigFile)
+	configFile, getConfigErr := config.File(*ConfigFile)
 	if getConfigErr != nil {
 		log.Fatalf("Error getting config file: %v", getConfigErr)
 	}

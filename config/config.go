@@ -94,7 +94,7 @@ func isValidConfigFile(filename string) bool {
 	return false
 }
 
-func GetSingleConfigFile(configFlag string) (string, error) {
+func File(configFlag string) (string, error) {
 	if configFlag != "" {
 		return configFlag, nil
 	}
