@@ -10,24 +10,24 @@ import (
 	"github.com/SlyMarbo/rss"
 )
 
-type FeedConfig struct {
+type Config struct {
 	URLs        []string
 	RescanDelay int
 }
 
-type FeedHandler struct {
-	config FeedConfig
+type Handler struct {
+	config Config
 	db     *sql.DB
 }
 
-func NewFeedHandler(config FeedConfig, db *sql.DB) *FeedHandler {
-	return &FeedHandler{
+func NewFeedHandler(config Config, db *sql.DB) *Handler {
+	return &Handler{
 		config: config,
 		db:     db,
 	}
 }
 
-func (fh *FeedHandler) CheckFeeds(ctx context.Context, onNewArticle func(title, link string) error) {
+func (fh *Handler) CheckFeeds(ctx context.Context, onNewArticle func(title, link string) error) {
 	ticker := time.NewTicker(time.Duration(fh.config.RescanDelay) * time.Second)
 	defer ticker.Stop()
 
@@ -60,7 +60,9 @@ func (fh *FeedHandler) CheckFeeds(ctx context.Context, onNewArticle func(title, 
 							continue
 						}
 
-						_, insertErr := fh.db.Exec("INSERT INTO seen_articles (id, title, link, date) VALUES (?, ?, ?, ?)", item.ID, item.Title, item.Link, item.Date)
+						_, insertErr := fh.db.Exec(
+							"INSERT INTO seen_articles (id, title, link, date) VALUES (?, ?, ?, ?)",
+							item.ID, item.Title, item.Link, item.Date)
 						if insertErr != nil {
 							log.Printf("ERROR: Failed inserting seen article: %v", insertErr)
 							continue

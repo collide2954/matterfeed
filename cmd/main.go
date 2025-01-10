@@ -59,7 +59,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	feedHandler := feed.NewFeedHandler(feed.FeedConfig{
+	feedHandler := feed.NewFeedHandler(feed.Config{
 		URLs:        cfg.Feeds.URLs,
 		RescanDelay: cfg.Feeds.RescanDelay,
 	}, db)
