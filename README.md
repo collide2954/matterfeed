@@ -7,7 +7,7 @@
 - Reads multiple RSS/ATOM/XML feeds
 - Sends new articles to Mattermost using a webhook
 - Utilizes SQLite for information storage
-- Opens a healthcheck endpoint for status changes
+- Opens a health-check endpoint for status changes
 
 ## Development
 
@@ -20,7 +20,3 @@ Refer to the Makefile for available commands:
 - `make lint` - Run linters with --fix flag for automatic fixes
 - `make test` - Run tests
 - `make vuln` - Check for vulnerabilities in dependencies
-
-## Contributing
-
-Contributions are welcome! Please submit pull requests through Codeberg.
