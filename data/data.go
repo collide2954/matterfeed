@@ -44,7 +44,7 @@ func InitDBWithRetry() (*sql.DB, error) {
 	var db *sql.DB
 	var err error
 
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		db, err = InitDB()
 		if err == nil {
 			return db, nil
