@@ -3,6 +3,7 @@ package config
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -99,7 +100,7 @@ func GetSingleConfigFile(configFlag string) (string, error) {
 
 	switch len(configFiles) {
 	case 0:
-		return "", fmt.Errorf("no valid config files found")
+		return "", errors.New("no valid config files found")
 	case 1:
 		return configFiles[0], nil
 	default:
