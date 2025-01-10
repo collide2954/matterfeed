@@ -1,0 +1,42 @@
+# Top-most EditorConfig file
+root = true
+
+# Universal settings for all files
+[*]
+charset = utf-8                     # Encoding standard
+end_of_line = lf                    # Line ending character
+max_line_length = 80
+insert_final_newline = true         # Ensure file ends with a newline
+trim_trailing_whitespace = true     # Remove any whitespace characters preceding newline characters
+
+# Go files
+[*.go]
+indent_style = tab                  # Go uses tabs for indentation
+indent_size = 2                     # Suggested display-width for tab characters; purely aesthetic, but useful for readability
+tab_width = 2                       # Width of a single tab
+
+# Go mod files
+[{go.mod,go.sum}]
+indent_style = tab                  # Tabs for go.mod and go.sum to keep consistency with Go files
+
+# Markdown files (common for README, etc.)
+[*.md]
+trim_trailing_whitespace = false    # In Markdown, trailing whitespace can be significant
+
+# YAML files, common for CI configurations, etc.
+[*.{yml,yaml}]
+indent_style = space                # YAML usually uses spaces for indentation
+indent_size = 2                     # Common indentation level for YAML files
+
+# JSON files, often used for configuration
+[*.json]
+indent_style = space
+indent_size = 2
+
+# Dockerfile
+[Dockerfile]
+indent_size = 4                     # Consistent indentation for Dockerfiles
+
+# Makefiles
+[Makefile]
+indent_style = tab                  # Makefile conventions require tabs
