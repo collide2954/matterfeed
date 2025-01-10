@@ -4,9 +4,8 @@ package feed
 import (
 	"context"
 	"database/sql"
+	"log"
 	"time"
-
-	"matterfeed/logger"
 
 	"github.com/SlyMarbo/rss"
 )
@@ -39,11 +38,11 @@ func (fh *FeedHandler) CheckFeeds(ctx context.Context, onNewArticle func(title, 
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			logger.LogInfo("Starting feed scan")
+			log.Printf("INFO: Starting feed scan")
 			for _, feedURL := range fh.config.URLs {
 				feed, fetchErr := rss.Fetch(feedURL)
 				if fetchErr != nil {
-					logger.LogAndReturnError(fetchErr, "fetching feed")
+					log.Printf("ERROR: Failed fetching feed: %v", fetchErr)
 					continue
 				}
 
@@ -51,7 +50,7 @@ func (fh *FeedHandler) CheckFeeds(ctx context.Context, onNewArticle func(title, 
 					var seen bool
 					queryErr := fh.db.QueryRow("SELECT EXISTS(SELECT 1 FROM seen_articles WHERE id = ?)", item.ID).Scan(&seen)
 					if queryErr != nil {
-						logger.LogAndReturnError(queryErr, "querying seen articles")
+						log.Printf("ERROR: Failed querying seen articles: %v", queryErr)
 						continue
 					}
 
@@ -63,7 +62,7 @@ func (fh *FeedHandler) CheckFeeds(ctx context.Context, onNewArticle func(title, 
 
 						_, insertErr := fh.db.Exec("INSERT INTO seen_articles (id, title, link, date) VALUES (?, ?, ?, ?)", item.ID, item.Title, item.Link, item.Date)
 						if insertErr != nil {
-							logger.LogAndReturnError(insertErr, "inserting seen article")
+							log.Printf("ERROR: Failed inserting seen article: %v", insertErr)
 							continue
 						}
 					}
