@@ -4,31 +4,30 @@ package feed
 import (
 	"context"
 	"database/sql"
+	"log"
 	"time"
-
-	"matterfeed/logger"
 
 	"github.com/SlyMarbo/rss"
 )
 
-type FeedConfig struct {
+type Config struct {
 	URLs        []string
 	RescanDelay int
 }
 
-type FeedHandler struct {
-	config FeedConfig
+type Handler struct {
+	config Config
 	db     *sql.DB
 }
 
-func NewFeedHandler(config FeedConfig, db *sql.DB) *FeedHandler {
-	return &FeedHandler{
+func NewFeedHandler(config Config, db *sql.DB) *Handler {
+	return &Handler{
 		config: config,
 		db:     db,
 	}
 }
 
-func (fh *FeedHandler) CheckFeeds(ctx context.Context, onNewArticle func(title, link string) error) {
+func (fh *Handler) CheckFeeds(ctx context.Context, onNewArticle func(title, link string) error) {
 	ticker := time.NewTicker(time.Duration(fh.config.RescanDelay) * time.Second)
 	defer ticker.Stop()
 
@@ -39,11 +38,11 @@ func (fh *FeedHandler) CheckFeeds(ctx context.Context, onNewArticle func(title, 
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			logger.LogInfo("Starting feed scan")
+			log.Printf("starting feed scan")
 			for _, feedURL := range fh.config.URLs {
 				feed, fetchErr := rss.Fetch(feedURL)
 				if fetchErr != nil {
-					logger.LogAndReturnError(fetchErr, "fetching feed")
+					log.Printf("failed fetching feed: %v", fetchErr)
 					continue
 				}
 
@@ -51,7 +50,7 @@ func (fh *FeedHandler) CheckFeeds(ctx context.Context, onNewArticle func(title, 
 					var seen bool
 					queryErr := fh.db.QueryRow("SELECT EXISTS(SELECT 1 FROM seen_articles WHERE id = ?)", item.ID).Scan(&seen)
 					if queryErr != nil {
-						logger.LogAndReturnError(queryErr, "querying seen articles")
+						log.Printf("failed querying seen articles: %v", queryErr)
 						continue
 					}
 
@@ -61,9 +60,11 @@ func (fh *FeedHandler) CheckFeeds(ctx context.Context, onNewArticle func(title, 
 							continue
 						}
 
-						_, insertErr := fh.db.Exec("INSERT INTO seen_articles (id, title, link, date) VALUES (?, ?, ?, ?)", item.ID, item.Title, item.Link, item.Date)
+						_, insertErr := fh.db.Exec(
+							"INSERT INTO seen_articles (id, title, link, date) VALUES (?, ?, ?, ?)",
+							item.ID, item.Title, item.Link, item.Date)
 						if insertErr != nil {
-							logger.LogAndReturnError(insertErr, "inserting seen article")
+							log.Printf("failed inserting seen article: %v", insertErr)
 							continue
 						}
 					}

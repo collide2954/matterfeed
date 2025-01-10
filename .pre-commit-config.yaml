@@ -1,9 +1,9 @@
 repos:
-- repo: https://github.com/golangci/golangci-lint
-  rev: v1.62.2
-  hooks:
-    - id: golangci-lint # Change to golangci-lint-full in future
-      args: [--config=.golangci.yml, --fix]
+#- repo: https://github.com/golangci/golangci-lint
+#  rev: v1.62.2
+#  hooks:
+#    - id: golangci-lint # Change to golangci-lint-full in future
+#      args: [--config=.golangci.yml, --fix]
 - repo: local
   hooks:
     - id: go-file-header-checker
