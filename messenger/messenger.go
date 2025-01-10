@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"net/http"
 )
@@ -27,22 +28,22 @@ func SendMessage(url, message string) error {
 		var opErr *net.OpError
 		if errors.As(err, &opErr) {
 			if opErr.Timeout() {
-				return fmt.Errorf("network timeout error: %w", err)
+				log.Printf("Network timeout error: %v", err)
 			}
-			return fmt.Errorf("network error: %w", err)
+			log.Printf("Network error: %v", err)
 		}
-		return fmt.Errorf("failed to send HTTP request: %w", err)
+		log.Printf("Failed to send HTTP request: %v", err)
 	}
 
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			fmt.Printf("Error closing response body: %v\n", err)
+			log.Printf("Error closing response body: %v", err)
 		}
 	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("failed to send message, status: %d, response: %s", resp.StatusCode, body)
+		log.Printf("Failed to send message, status: %d, response: %s", resp.StatusCode, body)
 	}
 
 	return nil
