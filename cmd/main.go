@@ -3,6 +3,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"flag"
 	"fmt"
 	"log"
@@ -16,10 +17,6 @@ import (
 	"matterfeed/feed"
 	"matterfeed/messenger"
 )
-
-type Message struct {
-	Text string `json:"text"`
-}
 
 var (
 	ConfigFile = flag.String("config", "", "Valid TOML configuration file")
@@ -38,7 +35,13 @@ func main() {
 		log.Printf("Error initializing database: %v", initDBErr)
 		os.Exit(1)
 	}
-	defer db.Close()
+
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			log.Printf("Error closing database: %v", err)
+		}
+	}(db)
 
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
