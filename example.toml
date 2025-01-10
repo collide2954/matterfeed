@@ -1,0 +1,12 @@
+[mattermost]
+secret_url = ""
+
+[feeds]
+urls = []
+rescan_delay = 60
+
+[logging]
+output_to_terminal = true
+
+[api]
+port = 22117
