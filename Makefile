@@ -8,8 +8,8 @@ BINARY_PATH := ./bin/matterfeed
 HOMEBREW = https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
 PACKAGES = go gopls golangci-lint govulncheck pre-commit
 
-# setup the dependencies
-brew:
+# setup the development dependencies
+tools:
 	@echo "Setting up development environment..."
 	@which brew >/dev/null || /bin/bash -c "$(curl -fsSL $(HOMEBREW))"
 	@brew update
@@ -21,9 +21,10 @@ brew:
 			echo "$$pkg is already installed."; \
 		fi; \
 	done
+	@go install github.com/vladopajic/go-test-coverage/v2@latest
 	@echo "Setup complete!"
 
-# tidy for managing dependencies
+# tidy for managing project dependencies
 tidy:
 	go mod tidy
 
@@ -33,7 +34,8 @@ lint: tidy
 
 # run tests
 test: lint
-	go test ./...
+	go test ./... -coverprofile=./cover.out -covermode=atomic -coverpkg=./...
+	${GOPATH}/bin/go-test-coverage --config=./.testcoverage.yml
 
 # build the project and place the binary in the bin directory
 build: test
