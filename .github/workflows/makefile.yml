@@ -20,7 +20,9 @@ jobs:
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
 
     - name: Install go-test-coverage
-      run: go install github.com/vladopajic/go-test-coverage/v2@latest
+      run: |
+          go install github.com/vladopajic/go-test-coverage/v2@latest
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
 
     - name: Run build process
       run: make build
