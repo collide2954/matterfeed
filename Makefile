@@ -3,6 +3,8 @@
 BUILD_PATH := ./cmd/*
 BINARY_PATH := ./bin/matterfeed
 
+COVERAGE_FILE := ./cover.out
+
 .PHONY: setup tidy lint test build run clean vuln help
 
 HOMEBREW = https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
@@ -47,7 +49,7 @@ run: build
 
 # remove the binary
 clean:
-	rm -f $(BINARY_PATH)
+	rm -f $(BINARY_PATH) $(COVERAGE_FILE)
 
 # check for vulnerabilities
 vuln:
