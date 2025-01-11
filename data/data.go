@@ -8,7 +8,7 @@ import (
 	"log"
 	"time"
 
-	_ "modernc.org/sqlite"
+	_ "modernc.org/sqlite" // Import for SQLite driver usage
 )
 
 func InitDB() (*sql.DB, error) {
