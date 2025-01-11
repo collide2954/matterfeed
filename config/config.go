@@ -94,12 +94,12 @@ func FindValidConfigFiles() ([]string, error) {
 func isValidConfigFile(filename string) bool {
 	file, err := os.Open(filename)
 	if err != nil {
-		log.Printf("Error opening file %s: %v", filename, err)
+		log.Printf("error opening file %s: %v", filename, err)
 		return false
 	}
 	defer func(file *os.File) {
 		if closeErr := file.Close(); closeErr != nil {
-			log.Printf("Error closing file %s: %v", filename, closeErr)
+			log.Printf("error closing file %s: %v", filename, closeErr)
 		}
 	}(file)
 
