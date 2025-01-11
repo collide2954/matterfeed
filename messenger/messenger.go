@@ -36,8 +36,8 @@ func SendMessage(url, message string) error {
 	}
 
 	defer func(Body io.ReadCloser) {
-		if err := Body.Close(); err != nil {
-			log.Printf("Error closing response body: %v", err)
+		if closeErr := Body.Close(); closeErr != nil {
+			log.Printf("Error closing response body: %v", closeErr)
 		}
 	}(resp.Body)
 
