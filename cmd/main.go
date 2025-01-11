@@ -20,8 +20,8 @@ import (
 )
 
 func main() {
-	flag.Parse()
 	configPath := flag.String("config", "", "Path to the TOML configuration file")
+	flag.Parse()
 	cfg, loadConfigErr := config.LoadConfig(*configPath)
 	if loadConfigErr != nil {
 		log.Fatalf("error loading config: %v", loadConfigErr)
