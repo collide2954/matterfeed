@@ -37,7 +37,7 @@ lint: tidy
 # run tests
 test: lint
 	go test ./... -coverprofile=./cover.out -covermode=atomic -coverpkg=./...
-	${GOPATH}/bin/go-test-coverage --config=./.testcoverage.yml
+	$$(go env GOPATH)/bin/go-test-coverage --config=./.testcoverage.yml
 
 # build the project and place the binary in the bin directory
 build: test
