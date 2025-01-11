@@ -23,7 +23,7 @@ func SendMessage(url, message string) error {
 		return fmt.Errorf("failed to marshal message: %w", err)
 	}
 
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(payload))
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(payload)) //nolint:gosec,bodyclose,noctx,lll // FIXME: This function should be rewritten.
 	if err != nil {
 		var opErr *net.OpError
 		if errors.As(err, &opErr) {
@@ -36,8 +36,8 @@ func SendMessage(url, message string) error {
 	}
 
 	defer func(Body io.ReadCloser) {
-		if err := Body.Close(); err != nil {
-			log.Printf("Error closing response body: %v", err)
+		if closeErr := Body.Close(); closeErr != nil {
+			log.Printf("Error closing response body: %v", closeErr)
 		}
 	}(resp.Body)
 

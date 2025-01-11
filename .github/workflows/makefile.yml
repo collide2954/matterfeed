@@ -15,9 +15,12 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Install golangci-lint
-      run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.63.4
-          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+      run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.63.4
+
+    - name: Install go-test-coverage
+      run: go install github.com/vladopajic/go-test-coverage/v2@latest
 
     - name: Run build process
-      run: make build
+      run: |
+        echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+        make build

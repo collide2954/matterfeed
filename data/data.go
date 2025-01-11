@@ -5,9 +5,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
-	_ "modernc.org/sqlite"
+	_ "modernc.org/sqlite" // Import for SQLite driver usage
 )
 
 func InitDB() (*sql.DB, error) {
@@ -44,13 +45,14 @@ func InitDBWithRetry() (*sql.DB, error) {
 	var db *sql.DB
 	var err error
 
-	for i := 0; i < 5; i++ {
+	const maxRetries = 5
+	for i := range maxRetries {
 		db, err = InitDB()
 		if err == nil {
 			return db, nil
 		}
 		if errors.Is(err, sql.ErrConnDone) || err.Error() == "database is locked" {
-			fmt.Printf("Database is locked, retrying... (%d/5)\n", i+1)
+			log.Printf("Database is locked, retrying... (%d/%d)\n", i+1, maxRetries)
 			time.Sleep(time.Duration(i) * time.Second)
 			continue
 		}

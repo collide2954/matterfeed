@@ -3,7 +3,9 @@ package config
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -35,7 +37,25 @@ type APIConfig struct {
 	Port int `toml:"port"`
 }
 
-func LoadConfig(filename string) (*Config, error) {
+func LoadConfig(configFlag string) (*Config, error) {
+	var filename string
+	if configFlag != "" {
+		filename = configFlag
+	} else {
+		configFiles, err := FindValidConfigFiles()
+		if err != nil {
+			return nil, err
+		}
+		switch len(configFiles) {
+		case 0:
+			return nil, errors.New("no valid config files found")
+		case 1:
+			filename = configFiles[0]
+		default:
+			return nil, fmt.Errorf("multiple valid config files found: %v", configFiles)
+		}
+	}
+
 	data, readErr := os.ReadFile(filename)
 	if readErr != nil {
 		return nil, readErr
@@ -74,9 +94,14 @@ func FindValidConfigFiles() ([]string, error) {
 func isValidConfigFile(filename string) bool {
 	file, err := os.Open(filename)
 	if err != nil {
+		log.Printf("error opening file %s: %v", filename, err)
 		return false
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		if closeErr := file.Close(); closeErr != nil {
+			log.Printf("error closing file %s: %v", filename, closeErr)
+		}
+	}(file)
 
 	scanner := bufio.NewScanner(file)
 	if scanner.Scan() {
@@ -85,24 +110,4 @@ func isValidConfigFile(filename string) bool {
 	}
 
 	return false
-}
-
-func GetSingleConfigFile(configFlag string) (string, error) {
-	if configFlag != "" {
-		return configFlag, nil
-	}
-
-	configFiles, err := FindValidConfigFiles()
-	if err != nil {
-		return "", err
-	}
-
-	switch len(configFiles) {
-	case 0:
-		return "", fmt.Errorf("no valid config files found")
-	case 1:
-		return configFiles[0], nil
-	default:
-		return "", fmt.Errorf("multiple valid config files found: %v", configFiles)
-	}
 }

@@ -3,6 +3,8 @@
 BUILD_PATH := ./cmd/*
 BINARY_PATH := ./bin/matterfeed
 
+COVERAGE_FILE := ./cover.out
+
 .PHONY: setup tidy lint test build run clean vuln help
 
 HOMEBREW = https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
@@ -34,8 +36,8 @@ lint: tidy
 
 # run tests
 test: lint
-	go test ./... -coverprofile=./cover.out -covermode=atomic -coverpkg=./...
-	${GOPATH}/bin/go-test-coverage --config=./.testcoverage.yml
+	@go test ./... -coverprofile=./cover.out -covermode=atomic -coverpkg=./... >/dev/null 2>&1
+	@$$(go env GOPATH)/bin/go-test-coverage --config=./.testcoverage.yml
 
 # build the project and place the binary in the bin directory
 build: test
@@ -47,7 +49,7 @@ run: build
 
 # remove the binary
 clean:
-	rm -f $(BINARY_PATH)
+	rm -f $(BINARY_PATH) $(COVERAGE_FILE)
 
 # check for vulnerabilities
 vuln:
@@ -57,7 +59,7 @@ vuln:
 # help with the commands
 help:
 	@echo "Makefile commands:"
-	@echo "  make brew     - Ensure the software dependencies for development"
+	@echo "  make tools     - Ensure the software dependencies for development"
 	@echo "  make build     - Build the binary"
 	@echo "  make run       - Run the application"
 	@echo "  make clean     - Remove the binary"

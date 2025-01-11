@@ -19,28 +19,23 @@ import (
 	"matterfeed/messenger"
 )
 
-var (
-	ConfigFile = flag.String("config", "", "Valid TOML configuration file")
-)
-
 func main() {
+	configPath := flag.String("config", "", "Path to the TOML configuration file")
 	flag.Parse()
-
-	configFile, getConfigErr := config.GetSingleConfigFile(*ConfigFile)
-	if getConfigErr != nil {
-		log.Fatalf("Error getting config file: %v", getConfigErr)
+	cfg, loadConfigErr := config.LoadConfig(*configPath)
+	if loadConfigErr != nil {
+		log.Fatalf("error loading config: %v", loadConfigErr)
 	}
 
 	db, initDBErr := data.InitDBWithRetry()
 	if initDBErr != nil {
-		log.Printf("Error initializing database: %v", initDBErr)
-		os.Exit(1)
+		log.Fatalf("error initializing database: %v", initDBErr)
 	}
 
 	defer func(db *sql.DB) {
 		err := db.Close()
 		if err != nil {
-			log.Printf("Error closing database: %v", err)
+			log.Printf("error closing database: %v", err)
 		}
 	}(db)
 
@@ -54,12 +49,6 @@ func main() {
 
 	var wg sync.WaitGroup
 
-	cfg, loadConfigErr := config.LoadConfig(configFile)
-	if loadConfigErr != nil {
-		log.Printf("Error reading config from file %s: %v", configFile, loadConfigErr)
-		os.Exit(1)
-	}
-
 	feedHandler := feed.NewFeedHandler(feed.Config{
 		URLs:        cfg.Feeds.URLs,
 		RescanDelay: cfg.Feeds.RescanDelay,
@@ -69,7 +58,7 @@ func main() {
 	go func() {
 		defer wg.Done()
 		feedHandler.CheckFeeds(ctx, func(title, link string) error {
-			message := fmt.Sprintf("New article: %s - %s", title, link)
+			message := fmt.Sprintf("New Article: %s - %s", title, link)
 			log.Println(message)
 			sendMessageErr := messenger.SendMessage(cfg.Mattermost.SecretURL, message)
 			if sendMessageErr != nil {
@@ -78,7 +67,6 @@ func main() {
 			return nil
 		})
 	}()
-
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -87,7 +75,7 @@ func main() {
 
 	go func() {
 		<-signalChan
-		log.Println("Received shutdown signal")
+		log.Println("Received Shutdown Signal")
 		close(stopCh)
 		cancel()
 	}()
@@ -98,5 +86,5 @@ func main() {
 	}()
 
 	<-doneCh
-	log.Println("All goroutines finished, shutting down.")
+	log.Println("All Goroutines Finished, Shutting Down.")
 }

@@ -2,6 +2,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 )
@@ -24,7 +25,7 @@ func ValidateConfig(cfg *Config) error {
 
 func validateMattermostConfig(cfg *MattermostConfig) error {
 	if cfg.SecretURL == "" {
-		return fmt.Errorf("mattermost.secret_url must be provided")
+		return errors.New("mattermost.secret_url must be provided")
 	}
 
 	_, err := url.Parse(cfg.SecretURL)
@@ -37,7 +38,7 @@ func validateMattermostConfig(cfg *MattermostConfig) error {
 
 func validateFeedsConfig(cfg *FeedsConfig) error {
 	if len(cfg.URLs) == 0 {
-		return fmt.Errorf("feeds.urls must contain at least one URL")
+		return errors.New("feeds.urls must contain at least one URL")
 	}
 
 	for _, feedURL := range cfg.URLs {
@@ -48,7 +49,7 @@ func validateFeedsConfig(cfg *FeedsConfig) error {
 	}
 
 	if cfg.RescanDelay <= 0 {
-		return fmt.Errorf("feeds.rescan_delay must be greater than zero")
+		return errors.New("feeds.rescan_delay must be greater than zero")
 	}
 
 	return nil
@@ -56,7 +57,7 @@ func validateFeedsConfig(cfg *FeedsConfig) error {
 
 func validateAPIConfig(cfg *APIConfig) error {
 	if cfg.Port <= 0 || cfg.Port > 65535 {
-		return fmt.Errorf("api.port must be between 1 and 65535")
+		return errors.New("api.port must be between 1 and 65535")
 	}
 	return nil
 }
