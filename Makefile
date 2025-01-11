@@ -59,7 +59,7 @@ vuln:
 # help with the commands
 help:
 	@echo "Makefile commands:"
-	@echo "  make brew     - Ensure the software dependencies for development"
+	@echo "  make tools     - Ensure the software dependencies for development"
 	@echo "  make build     - Build the binary"
 	@echo "  make run       - Run the application"
 	@echo "  make clean     - Remove the binary"
